@@ -143,4 +143,8 @@ def main():
     df = pd.DataFrame(data)
     df.to_csv("output.csv")
 
+data = {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}
+df = pd.DataFrame.from_dict(data)
+# # TODO: transform df to savable 
+
 if __name__ == '__main__': main()

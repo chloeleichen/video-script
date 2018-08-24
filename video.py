@@ -2,19 +2,17 @@ import numpy as np
 import cv2
 import imutils
 import matplotlib
+import pandas as pd
 import scipy.ndimage
 
 
-fish_thresh = 526
-door_thresh = 572
 
-def parseVideo(input, output):
+def parseVideo(input, output, fish_thresh = 526, door_thresh = 572):
     global door_open
     global framecount
     global fish_array
     global door_open_frame
 
-    door_open = 0
     framecount = 0
     fish_array = []
     door_open_frame = 0
@@ -36,11 +34,10 @@ def parseVideo(input, output):
 
             rgb_split = np.empty(fgmask.shape, 'uint8')
             rgb_split = cv2.merge([fgmask, fgmask, fgmask])
-
-            framecount = framecount + 1
-
             detectObject(rgb_split, framecount)
 
+
+            framecount = framecount + 1
             frameNumber = "Frame nb = {}".format(framecount)
 
             cv2.putText(rgb_split,
@@ -54,8 +51,7 @@ def parseVideo(input, output):
             # draw fish threshhold
             cv2.line(rgb_split,
                      (fish_thresh,0),
-                     (fish_thresh,
-                     rgb_split.shape[0]),
+                     (fish_thresh,rgb_split.shape[0]),
                      (255,0,0),
                      1)
 
@@ -74,7 +70,9 @@ def parseVideo(input, output):
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
         else:
-            print(fish_array)
+            fish_np_array = np.array(fish_array)
+            print(fish_np_array)
+            print(door_open_frame)
             break
 
     # cleanup the camera and close any open windows
@@ -83,7 +81,7 @@ def parseVideo(input, output):
     cv2.destroyAllWindows()
     print("\n\nBye bye\n")
 
-
+    return fish_np_array/door_open_frame
 
 
 def detectObject(image, framecount):
@@ -98,9 +96,11 @@ def detectObject(image, framecount):
     _, contours, hierarchy = cv2.findContours(thresh,
                                               cv2.RETR_TREE,
                                               cv2.CHAIN_APPROX_SIMPLE)
-    objects = np.zeros([gray.shape[0], gray.shape[1], 3], 'uint8')
-    global door_open
+    # objects = np.zeros([gray.shape[0], gray.shape[1], 3], 'uint8')
+
     global fish_array
+    global door_open_frame
+
     for c in contours:
         # cv2.drawContours(objects, [c], -1, (255, 0, 255), -1)
         M = cv2.moments(c)
@@ -111,14 +111,23 @@ def detectObject(image, framecount):
           cx = int(M['m10']/M['m00'])
         #identify fish and door
         # we only get the fish data after door is open
-        if(cx == fish_thresh and door_open == 1):
+        if(cx == fish_thresh and door_open_frame > 0):
             print ("fish detected at frame", framecount)
             fish_array.append(framecount)
-        elif(cx ==door_thresh and door_open == 0):
+
+        elif(cx ==door_thresh and door_open_frame == 0):
             if(area > 3500):
-              door_open = 1
+              door_open_frame = framecount
               print ("door open detected at frame", framecount)
               break
     return
 
-parseVideo('./trial/trial2.mov', 'output.m4v')
+
+
+def main():
+    data = parseVideo('./trial/trial2.mov', 'output.m4v', 526, 572)
+    print (data)
+    df = pd.DataFrame(data)
+    df.to_csv("output.csv")
+
+if __name__ == '__main__': main()

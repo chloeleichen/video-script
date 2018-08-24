@@ -1,12 +1,14 @@
 import cv2
-cap = cv2.VideoCapture('./trial/trial1.mov')
+cap = cv2.VideoCapture('./trial/trial9.mov')
 length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
 
 size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
 int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 
-fish_thresh = 516
-door_thresh = 572
+
+offset = -4
+fish_thresh = 514 + offset
+door_thresh = 570 + offset
 
 
 framecount = 0
@@ -25,14 +27,14 @@ def draw_line(frame, framecount):
     cv2.line(frame,
              (fish_thresh,0),
              (fish_thresh,frame.shape[0]),
-             (255,0,0),
+             (255,0,0, 0.5),
              1)
 
     #draw door threshhold
     cv2.line(frame,
              (door_thresh,0),
              (door_thresh,frame.shape[0]),
-             (241, 196, 15),
+             (241, 196, 15, 0.5),
              1)
     pass
 

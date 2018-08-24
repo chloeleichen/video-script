@@ -7,7 +7,7 @@ import scipy.ndimage
 
 
 
-def parseVideo(input, output, _fish_thresh, _door_thresh):
+def parseVideo(input, output, offset):
     global door_open
     global framecount
     global fish_array
@@ -18,8 +18,8 @@ def parseVideo(input, output, _fish_thresh, _door_thresh):
     framecount = 0
     fish_array = []
     door_open_frame = 0
-    fish_thresh = _fish_thresh
-    door_thresh = _door_thresh
+    fish_thresh = 514 + offset
+    door_thresh = 570 + offset
 
     cap = cv2.VideoCapture(input)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -129,7 +129,7 @@ def detectObject(image, framecount):
 
 
 def main():
-    source = {"trial1": (526, 572), "trial3": (526, 572), "trial4": (526, 572)}
+    source = {"trial1": 2, "trial3": 4, "trial4": 3}
     data = {}
 
     for key in source:
@@ -137,7 +137,7 @@ def main():
         print (source[key])
         input = './trial/' + key +'.mov'
         output = './trial/' + key +'.m4v'
-        data.update({key: parseVideo(input, output, source[key][0], source[key][1])})
+        data.update({key: parseVideo(input, output, source[key])})
 
     print (data)
     df = pd.DataFrame(data)

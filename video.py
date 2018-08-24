@@ -24,7 +24,7 @@ fish_thresh = 526
 # there is a movement detected with the door
 
 #This threshhold is not working sometimes
-door_thresh = 574
+door_thresh = 572
 fish_array = []
 
 def detectObject(image, framecount):
@@ -40,20 +40,21 @@ def detectObject(image, framecount):
         # cv2.drawContours(objects, [c], -1, (255, 0, 255), -1)
         M = cv2.moments(c)
         cx = 0
+        area = cv2.contourArea(c)
 
         if(M['m00'] >0):
           cx = int(M['m10']/M['m00'])
         #identify fish and door
-
         # we only get the fish data after door is open
         if(cx == fish_thresh and door_open == 1):
             # The fish detectin works pretty well, but the door detection is very dodgy
             print ("fish detected at frame", framecount)
             fish_array.append(framecount)
         elif(cx ==door_thresh and door_open == 0):
-            door_open = 1
-            print ("door open detected at frame", framecount)
-            break
+            if(area > 3500):
+              door_open = 1
+              print ("door open detected at frame", framecount)
+              break
     return
 
 framecount = 0
@@ -76,7 +77,11 @@ while(cap.isOpened()):
 
         cv2.putText(rgb_split, frameNumber, (10, rgb_split.shape[0] - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.35, (0,0, 255), 1)
 
+        # draw fish threshhold
         cv2.line(rgb_split,(fish_thresh,0),(fish_thresh,rgb_split.shape[0]),(255,0,0),1)
+
+        #draw door threshhold
+        cv2.line(rgb_split,(door_thresh,0),(door_thresh,rgb_split.shape[0]),(241, 196, 15),1)
 
         # also record a video to check correctness of detection
         video_writer.write(rgb_split)

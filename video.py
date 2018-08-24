@@ -5,7 +5,7 @@ import matplotlib
 import scipy.ndimage
 
 
-cap = cv2.VideoCapture('/Users/chloe/sites/ml/trial/trial2.mov')
+cap = cv2.VideoCapture('./trial/trial2.mov')
 kernel = np.ones((2,2),np.uint8)
 size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))
 

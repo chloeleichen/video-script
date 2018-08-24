@@ -32,6 +32,8 @@ def parseVideo(input, output):
         ret, frame = cap.read()
         if ret==True:
             fgmask = fgbg.apply(frame)
+            # fgmask = cv2.morphologyEx(fgmask, cv2.MORPH_OPEN, kernel)
+
             rgb_split = np.empty(fgmask.shape, 'uint8')
             rgb_split = cv2.merge([fgmask, fgmask, fgmask])
 

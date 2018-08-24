@@ -7,15 +7,19 @@ import scipy.ndimage
 
 
 
-def parseVideo(input, output, fish_thresh = 526, door_thresh = 572):
+def parseVideo(input, output, _fish_thresh, _door_thresh):
     global door_open
     global framecount
     global fish_array
     global door_open_frame
+    global fish_thresh
+    global door_thresh
 
     framecount = 0
     fish_array = []
     door_open_frame = 0
+    fish_thresh = _fish_thresh
+    door_thresh = _door_thresh
 
     cap = cv2.VideoCapture(input)
     size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)),
@@ -125,7 +129,16 @@ def detectObject(image, framecount):
 
 
 def main():
-    data = parseVideo('./trial/trial2.mov', 'output.m4v', 526, 572)
+    source = {"trial1": (526, 572), "trial3": (526, 572), "trial4": (526, 572)}
+    data = {}
+
+    for key in source:
+        print (key)
+        print (source[key])
+        input = './trial/' + key +'.mov'
+        output = './trial/' + key +'.m4v'
+        data.update({key: parseVideo(input, output, source[key][0], source[key][1])})
+
     print (data)
     df = pd.DataFrame(data)
     df.to_csv("output.csv")

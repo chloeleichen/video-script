@@ -7,7 +7,7 @@ import scipy.ndimage
 
 
 
-def parseVideo(input, output, offset):
+def parseVideo(input, output, offset, id):
     global door_open
     global framecount
     global fish_array
@@ -69,7 +69,7 @@ def parseVideo(input, output, offset):
             # also record a video to check correctness of detection
             video_writer.write(rgb_split)
 
-            cv2.imshow('frame',rgb_split)
+            cv2.imshow(id,rgb_split)
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -98,13 +98,12 @@ def detectObject(image, framecount):
     _, contours, hierarchy = cv2.findContours(thresh,
                                               cv2.RETR_TREE,
                                               cv2.CHAIN_APPROX_SIMPLE)
-    # objects = np.zeros([gray.shape[0], gray.shape[1], 3], 'uint8')
 
     global fish_array
     global door_open_frame
 
     for c in contours:
-        # cv2.drawContours(objects, [c], -1, (255, 0, 255), -1)
+        # cv2.drawContours(image, [c], -1, (255, 0, 255), -1)
         M = cv2.moments(c)
         cx = 0
         area = cv2.contourArea(c)
@@ -118,7 +117,7 @@ def detectObject(image, framecount):
             fish_array.append(framecount)
 
         elif(cx ==door_thresh and door_open_frame == 0):
-            if(area > 3500):
+            if(area > 350):
               door_open_frame = framecount
               print ('door open detected at frame', framecount)
               break
@@ -128,12 +127,13 @@ def detectObject(image, framecount):
 
 def main():
     source = {'trial1': {'id': 1, 'offset': 2},'trial3': {'id': 3, 'offset': 4}, 'trial4': {'id': 4, 'offset': 4}, 'trial5': {'id': 5, 'offset': 0}, 'trial6': {'id': 6, 'offset': -5}, 'trial7': {'id': 7, 'offset': -2}, 'trial8': {'id': 8, 'offset': -1}, 'trial9': {'id': 9, 'offset': -4}}
+    # source = {'trial1': {'id': 1, 'offset': 2}}
     data = np.empty([0, 2])
 
     for key in source:
         input = './trial/' + key +'.mov'
         output = './trial/' + key +'.m4v'
-        location_array = parseVideo(input, output, source[key]['offset'])
+        location_array = parseVideo(input, output, source[key]['offset'], key)
         table = np.reshape(location_array, (len(location_array), 1))
         table_w_id = np.insert(table, 0, source[key]['id'], axis = 1)
         data = np.append(data, table_w_id, axis=0)

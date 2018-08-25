@@ -42,7 +42,7 @@ def parseVideo(input, output, offset):
 
 
             framecount = framecount + 1
-            frameNumber = "Frame nb = {}".format(framecount)
+            frameNumber = 'Frame nb = {}'.format(framecount)
 
             cv2.putText(rgb_split,
                         frameNumber,
@@ -75,15 +75,13 @@ def parseVideo(input, output, offset):
                 break
         else:
             fish_np_array = np.array(fish_array)
-            print(fish_np_array)
-            print(door_open_frame)
             break
 
     # cleanup the camera and close any open windows
     cap.release()
     video_writer.release()
     cv2.destroyAllWindows()
-    print("\n\nBye bye\n")
+    print('\n\nBye bye\n')
 
     return fish_np_array/door_open_frame
 
@@ -116,35 +114,34 @@ def detectObject(image, framecount):
         #identify fish and door
         # we only get the fish data after door is open
         if(cx == fish_thresh and door_open_frame > 0):
-            print ("fish detected at frame", framecount)
+            print ('fish detected at frame', framecount)
             fish_array.append(framecount)
 
         elif(cx ==door_thresh and door_open_frame == 0):
             if(area > 3500):
               door_open_frame = framecount
-              print ("door open detected at frame", framecount)
+              print ('door open detected at frame', framecount)
               break
     return
 
 
 
 def main():
-    source = {"trial1": 2, "trial3": 4, "trial4": 3}
-    data = {}
+    source = {'trial1': {'id': 1, 'offset': 2},'trial3': {'id': 3, 'offset': 4}, 'trial4': {'id': 4, 'offset': 4}, 'trial5': {'id': 5, 'offset': 0}, 'trial6': {'id': 6, 'offset': -5}, 'trial7': {'id': 7, 'offset': -2}, 'trial8': {'id': 8, 'offset': -1}, 'trial9': {'id': 9, 'offset': -4}}
+    data = np.empty([0, 2])
 
     for key in source:
-        print (key)
-        print (source[key])
         input = './trial/' + key +'.mov'
         output = './trial/' + key +'.m4v'
-        data.update({key: parseVideo(input, output, source[key])})
+        location_array = parseVideo(input, output, source[key]['offset'])
+        table = np.reshape(location_array, (len(location_array), 1))
+        table_w_id = np.insert(table, 0, source[key]['id'], axis = 1)
+        data = np.append(data, table_w_id, axis=0)
 
-    print (data)
-    df = pd.DataFrame(data)
-    df.to_csv("output.csv")
+    print(data)
 
-data = {'col_1': [3, 2, 1, 0], 'col_2': ['a', 'b', 'c', 'd']}
-df = pd.DataFrame.from_dict(data)
-# # TODO: transform df to savable 
+    df = pd.DataFrame({'id':data[:,0],'value':data[:,1]})
+    df.to_csv('output.csv')
+
 
 if __name__ == '__main__': main()
